@@ -1,7 +1,7 @@
 const redis = require('./redis');
 const config = require('../config');
-const {generateRandomVehicles} = require('../simulation/vehicles');
-const {createVehicle} = require('../client-thrift');
+// const {generateRandomVehicles} = require('../simulation/vehicles');
+// const {createVehicle} = require('../client-thrift');
 
 const parseVehiclesArray = vehicles =>
   vehicles
@@ -17,7 +17,9 @@ const parseVehiclesArray = vehicles =>
       missions_completed_7_days: parseInt(vehicle.missions_completed_7_days),
     }));
 
-const addNewVehicle = vehicle => {
+
+// TODO: remove simulation code from here
+/* const addNewVehicle = vehicle => {
   // Add to vehicles
   redis.hmsetAsync(`vehicles:${vehicle.id}`,
     'id', vehicle.id,
@@ -34,7 +36,7 @@ const addNewVehicle = vehicle => {
   setVehicleTTL(vehicle.id);
   // Send new vehicle to Captain
   createVehicle(vehicle);
-};
+}; */
 
 const getVehicle = async id => {
   setVehicleTTL(id);
@@ -43,7 +45,7 @@ const getVehicle = async id => {
   return vehicle;
 };
 
-const setVehicleTTL = vehicleId => 
+const setVehicleTTL = vehicleId =>
   redis.expire(`vehicles:${vehicleId}`, config('vehicles_ttl'));
 
 const getVehicles = async vehicleIds =>
@@ -83,40 +85,45 @@ const getLatestPositionUpdate = async (vehicle) => {
   return await redis.zrevrangeAsync(`vehicles:${vehicle.id}:positions`, 0, -1, 'withscores');
 };
 
+
+// TODO: These should be handles by CAP-24
+
 // returns the specific solo vehicle for bid creation
-const generateSoloVehicleForBid = (coords) => {
+/* const generateSoloVehicleForBid = (coords) => {
   const vehicle = generateRandomVehicles(1, coords)[0];
   addNewVehicle(vehicle);
   return vehicle;
-};
+}; */
 
-const generateAndAddVehicles = (count, coords, radius) =>
+/* const generateAndAddVehicles = (count, coords, radius) =>
   count > 0 && generateRandomVehicles(count, coords, radius)
     .forEach(vehicle => {
       addNewVehicle(vehicle);
-    });
+    }); */
 
 const getVehiclesInRange = async (coords, radius) => {
-  const shortRangeRadius = radius / 7;
-  const desiredVehicleCountInShortRange = 3;
-  const desiredVehicleCountInLongRange = 100;
+  // const shortRangeRadius = radius / 7;
+  // const desiredVehicleCountInShortRange = 3;
+  // const desiredVehicleCountInLongRange = 100;
 
   // get list of known vehicles in short range
-  const vehiclesInShortRange = await redis.georadiusAsync('vehicle_positions', coords.long, coords.lat, shortRangeRadius, 'm');
+  // const vehiclesInShortRange = await redis.georadiusAsync('vehicle_positions', coords.long, coords.lat, shortRangeRadius, 'm');
+
+
   // if not enough vehicles in short range generate new ones
-  generateAndAddVehicles(desiredVehicleCountInShortRange - vehiclesInShortRange.length, coords, shortRangeRadius);
+  // generateAndAddVehicles(desiredVehicleCountInShortRange - vehiclesInShortRange.length, coords, shortRangeRadius);
 
   // get list of known vehicles in long range
   const vehiclesInLongRange = await redis.georadiusAsync('vehicle_positions', coords.long, coords.lat, radius, 'm');
   // if not enough vehicles in long range generate new ones
-  generateAndAddVehicles(desiredVehicleCountInLongRange - vehiclesInLongRange.length, coords, radius);
+  // generateAndAddVehicles(desiredVehicleCountInLongRange - vehiclesInLongRange.length, coords, radius);
 
   // get details for vehicles in range
   return await getVehicles(vehiclesInLongRange);
 };
 
 module.exports = {
-  generateSoloVehicleForBid,
+  // generateSoloVehicleForBid,
   getVehiclesInRange,
   getVehicle,
   getVehicles,

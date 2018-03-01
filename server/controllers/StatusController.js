@@ -3,8 +3,8 @@ const {getBidsForNeed} = require('../store/bids');
 const {getLatestMission, updateMission} = require('../store/missions');
 const {createMissionUpdate} = require('../store/mission_updates');
 const {hasStore} = require('../lib/environment');
-const missionProgress = require('../simulation/missionProgress');
-const {calculateNextCoordinate} = require('../simulation/vehicles');
+// const missionProgress = require('../simulation/missionProgress');
+// const {calculateNextCoordinate} = require('../simulation/vehicles');
 
 const getStatus = async (req, res) => {
   const {lat, long, needId, user_id} = req.query;
@@ -46,7 +46,9 @@ const getStatus = async (req, res) => {
       const mission = latestMission;
       let vehicle = await getVehicle(latestMission.vehicle_id);
       const status = 'in_mission';
-      const currentStatus = missionProgress[vehicle.status];
+
+      // TODO: Retrieve mission status from Captain
+      const currentStatus = {};// missionProgress[vehicle.status];
 
       if (currentStatus.beforeUpdate) await currentStatus.beforeUpdate(latestMission);
       if (currentStatus.conditionForNextUpdate(latestMission)) {
@@ -58,11 +60,14 @@ const getStatus = async (req, res) => {
         await updateVehicleStatus(latestMission.vehicle_id, currentStatus.nextVehicleStatus);
       }
 
-      const leg = vehicle.status.split('_')[1]; // pickup or dropoff
-      const latestPositionUpdate = await getLatestPositionUpdate(vehicle);
-      const positionLastUpdatedAt = latestPositionUpdate[1];
-      const previousPosition = await getPosition(latestPositionUpdate[0]);
-      const newCoords = await calculateNextCoordinate(vehicle, mission, leg, positionLastUpdatedAt, previousPosition);
+      // TODO: Retrieve mission status from Captain
+
+      // const leg = vehicle.status.split('_')[1]; // pickup or dropoff
+      // const latestPositionUpdate = await getLatestPositionUpdate(vehicle);
+      // const positionLastUpdatedAt = latestPositionUpdate[1];
+      // const previousPosition = await getPosition(latestPositionUpdate[0]);
+
+      const newCoords = {};//await calculateNextCoordinate(vehicle, mission, leg, positionLastUpdatedAt, previousPosition);
       if (!(isNaN(newCoords.long) || isNaN(newCoords.lat))){
         await updateVehiclePosition(vehicle, newCoords.long, newCoords.lat);
       }

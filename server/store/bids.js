@@ -1,7 +1,7 @@
 const redis = require('./redis');
 const config = require('../config');
-const { randomBid } = require('../simulation/vehicles');
-const { getVehicle, generateSoloVehicleForBid } = require('../store/vehicles');
+// const { randomBid } = require('../simulation/vehicles');
+const { getVehicle/* , generateSoloVehicleForBid */ } = require('../store/vehicles');
 const { getNeed } = require('./needs');
 
 const saveBid = async ({ vehicle_id, time_to_pickup, time_to_dropoff, price, price_type, price_description, expires_at  }, needId, userId) => {
@@ -72,8 +72,9 @@ const getBidsForNeed = async needId => {
       if (vehicle.status !== 'available') {
         // if the vehicle is not available then we will generate
         // some new vehicle to simulate the entry of new providers (default radius)
-        const pickupNumber = {lat: parseFloat(pickup.lat), long: parseFloat(pickup.long)};
-        vehicle = generateSoloVehicleForBid(pickupNumber);
+        // TODO: remove simulation code from here
+        // const pickupNumber = {lat: parseFloat(pickup.lat), long: parseFloat(pickup.long)};
+        // vehicle = generateSoloVehicleForBid(pickupNumber);
       }
       let newBid = await generateBidFromVehicle(vehicle, pickup, dropoff, needId, userId);
       bids.push(newBid);
@@ -83,8 +84,9 @@ const getBidsForNeed = async needId => {
 };
 
 const generateBidFromVehicle = async (vehicle, pickup, dropoff, needId, userId) => {
-  const origin = { lat: vehicle.coords.lat, long: vehicle.coords.long };
-  let newBid = randomBid(origin, pickup, dropoff);
+  // TODO: Get bids from captains
+  // const origin = { lat: vehicle.coords.lat, long: vehicle.coords.long };
+  let newBid = {};//randomBid(origin, pickup, dropoff);
   newBid.vehicle_id = vehicle.id;
   const newBidId = await saveBid(newBid, needId, userId);
   newBid.id = newBidId;
