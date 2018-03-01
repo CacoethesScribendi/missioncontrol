@@ -1,7 +1,25 @@
 const {createNeed, getNeed, deleteNeed} = require('../store/needs');
 const {deleteBidsForNeed} = require('../store/bids');
 const createConstraints = require('./constraints/need/create');
+const registerConstraints = require('./constraints/need/registerConstraints');
 const validate = require('../lib/validate');
+
+
+const registerNeedSupport = async (req, res) => {
+  let params = req.body;
+  let validationErrors = [];
+
+  if (!validate.isArray(params))  params = [params];
+  params.forEach(item => {
+    const error = validate(item, registerConstraints);
+    if(error) validationErrors.push(error);
+  });
+
+  if (validationErrors.length > 0) {
+    res.status(422).json(validationErrors);
+  }
+
+}
 
 const create = async (req, res) => {
   const params = req.body;
@@ -35,4 +53,4 @@ const cancel = async (req, res) => {
 };
 
 
-module.exports = {create, cancel};
+module.exports = {create, cancel, registerNeedSupport};

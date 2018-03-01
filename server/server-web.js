@@ -28,6 +28,7 @@ app.get('/healthy', (req, res) => {
 app.get('/status', StatusController.getStatus);
 
 app.post('/needs', NeedController.create);
+app.post('/needs/register', NeedController.registerNeedSupport);
 app.delete('/needs/:needId', NeedController.cancel);
 
 app.get('/bids/:needId', BidController.fetch);

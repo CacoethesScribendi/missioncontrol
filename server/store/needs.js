@@ -2,6 +2,10 @@ const redis = require('./redis');
 const config = require('../config');
 const { getVehiclesInRange } = require('./vehicles');
 
+const registerNeedSupport = async needTypes => {
+
+}
+
 const getNeed = async needId => {
   // Set TTL for need
   setNeedTTL(needId);
@@ -32,4 +36,5 @@ module.exports = {
   createNeed,
   getNeed,
   deleteNeed,
+  registerNeedSupport
 };
