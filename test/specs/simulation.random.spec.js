@@ -1,4 +1,6 @@
-const {
+// TODO: Remove simulation code fro here
+
+/* const {
   randomDroneModel,
   randomDavAddress,
   randomMissionsCompleted,
@@ -90,3 +92,4 @@ describe('randomCoords()', () => {
     ).toBeLessThanOrEqual(sampleArguments.radius);
   });
 });
+ */

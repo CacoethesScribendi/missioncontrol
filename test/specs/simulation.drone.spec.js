@@ -1,4 +1,6 @@
-const { generateRandom } = require('../../server/simulation/drone');
+// TODO: Remove simulation code fro here
+
+/* const { generateRandom } = require('../../server/simulation/drone');
 
 describe('generateRandom()', () => {
   const sampleArguments = { coords: { lat: 1, long: 1 }, distance: 1000 };
@@ -46,3 +48,4 @@ describe('generateRandom()', () => {
 
   });
 });
+ */
