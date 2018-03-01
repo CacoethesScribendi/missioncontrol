@@ -1,4 +1,4 @@
-const {getVehiclesInRange, updateVehicleStatus, getVehicle, getVehicles, updateVehiclePosition, getPosition, getLatestPositionUpdate} = require('../store/vehicles');
+const {getVehiclesInRange, updateVehicleStatus, getVehicle, getVehicles, updateVehiclePosition/* , getPosition, getLatestPositionUpdate */} = require('../store/vehicles');
 const {getBidsForNeed} = require('../store/bids');
 const {getLatestMission, updateMission} = require('../store/missions');
 const {createMissionUpdate} = require('../store/mission_updates');
