@@ -1,1 +1,1 @@
-module.exports = ['car_parking', 'cargo_insurance', 'drone_charging', 'drone_delivery', 'ev_charging', 'ride_hailing', 'vehicle_locating']
+module.exports = ['drone_delivery', 'car_parking', 'cargo_insurance', 'drone_charging', 'ev_charging', 'ride_hailing', 'vehicle_locating']

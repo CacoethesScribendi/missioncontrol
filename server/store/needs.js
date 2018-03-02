@@ -1,10 +1,6 @@
 const redis = require('./redis');
 const config = require('../config');
-const { getVehiclesInRange } = require('./vehicles');
 
-const registerNeedSupport = async needTypes => {
-
-}
 
 const getNeed = async needId => {
   // Set TTL for need
@@ -17,9 +13,6 @@ const createNeed = async needDetails => {
   const needId = await redis.incrAsync('next_need_id');
   const key_value_array = [].concat(...Object.entries(needDetails));
   redis.hmsetAsync(`needs:${needId}`, ...key_value_array);
-
-  // See if there are any vehicles around the pickup position, if not a few vehicles will be generated there
-  getVehiclesInRange({ lat: parseFloat(needDetails.pickup_latitude), long: parseFloat(needDetails.pickup_longitude) }, 7000);
 
   // Set TTL for need
   setNeedTTL(needId);
@@ -35,6 +28,5 @@ const setNeedTTL = needId => redis.expire(`needs:${needId}`, config('needs_ttl')
 module.exports = {
   createNeed,
   getNeed,
-  deleteNeed,
-  registerNeedSupport
+  deleteNeed
 };

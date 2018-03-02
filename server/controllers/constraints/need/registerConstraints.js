@@ -1,30 +1,10 @@
-const needTypes = require('../../../config/needTypes')
-
 module.exports = {
-  need_type: {
+  need_types: {
     presence: true,
-    inclusion: {
-      within: needTypes
-    }
+    type: "array"
   },
-  "region.center_longitude": {
+  notification_url: {
     presence: true,
-    numericality: {
-      lessThanOrEqualTo: 180,
-      greaterThanOrEqualTo: -180
-    }
-  },
-  "region.center_latitude": {
-    presence: true,
-    numericality: {
-      lessThanOrEqualTo: 90,
-      greaterThanOrEqualTo: -90
-    }
-  },
-  "region.radius": {
-    presence: true,
-    numericality: {
-      greaterThan: 0
-    }
+    url: true
   }
 }
