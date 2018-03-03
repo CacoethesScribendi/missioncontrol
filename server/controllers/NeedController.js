@@ -4,7 +4,6 @@ const {addNewCaptain, getCaptainsForNeedType} = require('../store/captains');
 const createConstraints = require('./constraints/need/create');
 const needTypesConstraints = require('./constraints/need/needTypesConstraints');
 const registerConstraints = require('./constraints/need/registerConstraints');
-const needTypes = require('../config/needTypes');
 const validate = require('../lib/validate');
 const axios = require('axios');
 
@@ -53,8 +52,8 @@ const create = async (req, res) => {
 };
 
 const notifyCaptains = async (needId) => {
-  const captains = await getCaptainsForNeedType(needTypes[0]) // defaults to drone delivery
-  const need = getNeed(needId);
+  const need = await getNeed(needId);
+  const captains = await getCaptainsForNeedType(need.need_type)
   const notification = {
     notification_type: 'new_need',
     data: {

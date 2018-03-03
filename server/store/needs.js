@@ -1,5 +1,6 @@
 const redis = require('./redis');
 const config = require('../config');
+const needTypes = require('../config/needTypes');
 
 
 const getNeed = async needId => {
@@ -9,6 +10,7 @@ const getNeed = async needId => {
 };
 
 const createNeed = async needDetails => {
+  needDetails.need_type = needTypes[0] // default to drone delivery for now
   // get new unique id for need
   const needId = await redis.incrAsync('next_need_id');
   const key_value_array = [].concat(...Object.entries(needDetails));

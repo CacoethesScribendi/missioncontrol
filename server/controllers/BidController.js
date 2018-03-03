@@ -3,6 +3,10 @@ const {hasStore} = require('../lib/environment');
 const {createMission} = require('../store/missions');
 const {updateVehicleStatus} = require('../store/vehicles');
 
+const create = async (req, res) => {
+  const {needId} = req.params;
+}
+
 const fetch = async (req, res) => {
   const {needId} = req.params;
   const bids = (!hasStore() || !needId) ? [] : await getBidsForNeed(needId);
@@ -10,7 +14,7 @@ const fetch = async (req, res) => {
 };
 
 const chooseBid = async (req, res) => {
-  const {user_id } = req.query;
+  const {user_id} = req.query;
   const {bidId} = req.params;
   const mission = await createMission({
     user_id,
@@ -24,4 +28,4 @@ const chooseBid = async (req, res) => {
   }
 };
 
-module.exports = {fetch, chooseBid};
+module.exports = {fetch, chooseBid, create};
