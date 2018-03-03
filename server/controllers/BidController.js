@@ -1,11 +1,27 @@
-const {getBidsForNeed} = require('../store/bids');
+const {getBidsForNeed, saveBid } = require('../store/bids');
 const {hasStore} = require('../lib/environment');
-const {createMission} = require('../store/missions');
+const {createMission} = require('../tore/missions');
 const {updateVehicleStatus} = require('../store/vehicles');
+const createConstraints = require('./constraints/bid/create');
+const validate = require('../lib/validate');
 
 const create = async (req, res) => {
   const {needId} = req.params;
-}
+  const { user_id } = req.query;
+  const params = req.body;
+
+  const validationErrors = validate(params, createConstraints);
+  if (validationErrors) {
+    res.status(422).json(validationErrors);
+  } else {
+    const bidId = await saveBid(params, needId, user_id);
+    if (bidId) {
+      res.json({bidId});
+    } else {
+      res.status(500).send('Something broke!');
+    }
+  }
+};
 
 const fetch = async (req, res) => {
   const {needId} = req.params;
