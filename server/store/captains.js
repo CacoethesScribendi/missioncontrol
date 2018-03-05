@@ -13,16 +13,16 @@ const addNewCaptain = async (needTypes, notificationURL) => {
   // TODO: Save need types and region(s)
 
   return davId;
-}
+};
 
 const getCaptainsForNeedType = async (needType) => {
   const davIds = await redis.smembersAsync(`needTypes:${needType}`);
   const captains = await Promise.map(davIds.map((id) => {
-    return redis.hgetallAsync(`captains:${id}`)
+    return redis.hgetallAsync(`captains:${id}`);
   }));
 
   return captains;
-}
+};
 
 module.exports = {
   addNewCaptain,

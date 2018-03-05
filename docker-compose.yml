@@ -7,6 +7,7 @@ services:
     ports:
       - '8888:8443'
       - '9090:9090'
+      - '5858:5858'
     environment:
       NODE_ENV: development
       DAV_ENV: simulated
@@ -19,13 +20,19 @@ services:
       - .:/app
     links:
       - redis:redis
+      - aerospike:aerospike
     networks:
       - dav
   redis:
     image: redis
     networks:
       - dav
-
+  aerospike:
+    # environment:
+      # NAMESPACE: mc
+    image: aerospike/aerospike-server
+    networks:
+      - dav
 networks:
   dav:
     external: true
