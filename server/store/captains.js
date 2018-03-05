@@ -1,5 +1,5 @@
 const redis = require('./redis');
-const uuid = require('uuid/v4')
+const uuid = require('uuid/v4');
 
 const addNewCaptain = async (needTypes, notificationURL) => {
   const davId = uuid();

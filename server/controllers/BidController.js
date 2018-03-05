@@ -3,9 +3,9 @@ const {hasStore} = require('../lib/environment');
 const {createMission} = require('../store/missions');
 const {updateVehicleStatus} = require('../store/vehicles');
 
-const create = async (req, res) => {
-  const {needId} = req.params;
-}
+const create = async (/*req , res */) => {
+  // const {needId} = req.params;
+};
 
 const fetch = async (req, res) => {
   const {needId} = req.params;

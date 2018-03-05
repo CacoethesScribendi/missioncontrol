@@ -12,11 +12,11 @@ const registerNeedSupport = async (req, res) => {
   validateRegistrationParameters(params, res);
   const davId = await addNewCaptain(params.need_types, params.notification_url);
   res.json({dav_id: davId});
-}
+};
 
 
 const validateRegistrationParameters = (params, res) => {
-  let validationErrors = validate(params, registerConstraints)
+  let validationErrors = validate(params, registerConstraints);
   if (validationErrors) {
     res.status(422).json(validationErrors);
   } else {
@@ -25,10 +25,10 @@ const validateRegistrationParameters = (params, res) => {
     needTypes.forEach(item => {
       const error = validate(item, needTypesConstraints);
       if (error) validationErrors.push(error);
-    })
+    });
     if (validationErrors.length > 0) res.status(422).json(validationErrors);
   }
-}
+};
 
 const create = async (req, res) => {
   const params = req.body;
@@ -53,16 +53,16 @@ const create = async (req, res) => {
 
 const notifyCaptains = async (needId) => {
   const need = await getNeed(needId);
-  const captains = await getCaptainsForNeedType(need.need_type)
+  const captains = await getCaptainsForNeedType(need.need_type);
   const notification = {
     notification_type: 'new_need',
     data: {
       need: need
     }
-  }
+  };
 
-  Promise.all(captains.map(captain => axios.post(captain.notification_url, notification)))
-}
+  Promise.all(captains.map(captain => axios.post(captain.notification_url, notification)));
+};
 
 
 const cancel = async (req, res) => {
