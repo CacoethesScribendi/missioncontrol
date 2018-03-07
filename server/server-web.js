@@ -5,6 +5,7 @@ const StatusController = require('./controllers/StatusController');
 const NeedController = require('./controllers/NeedController');
 const BidController = require('./controllers/BidController');
 const MissionController = require('./controllers/MissionController');
+const CaptainController = require('./controllers/CaptainController');
 
 // Create thrift connection to Captain
 require('./client-thrift').start({
@@ -37,7 +38,9 @@ app.get('/mission_command', MissionController.command);
 
 
 // endpoints for captain/dav-js
-app.post('/needs/register', NeedController.registerNeedSupport);
+app.post('/captains', CaptainController.create);
+app.post('/captains/:davId', CaptainController.registerNeedTypeForCaptain);
+
 app.post('/bids/:needId', BidController.create);
 
 module.exports = {

@@ -7,7 +7,7 @@ const { getVehicle/* , generateSoloVehicleForBid */ } = require('../store/vehicl
 const { getNeed } = require('./needs');
 const aerospike = Aerospike.client(aerospikeConfig());
 
-const saveBid = async ({ vehicle_id, time_to_pickup, time_to_dropoff, price, price_type, price_description, expires_at }, needId, userId) => {
+const addNewBid = async ({ dav_id, vehicle_id, time_to_pickup, time_to_dropoff, price, price_type, price_description, expires_at }, needId) => {
   // get new unique id for bid
   const bidId = await redis.incrAsync('next_bid_id');
 
@@ -15,10 +15,10 @@ const saveBid = async ({ vehicle_id, time_to_pickup, time_to_dropoff, price, pri
   redis.rpushAsync(`need_bids:${needId}`, bidId);
 
   // Add bid to bids
-  redis.hmsetAsync(`bids:${bidId}`,
+  await redis.hmsetAsync(`bids:${bidId}`,
     'id', bidId,
     'vehicle_id', vehicle_id,
-    'user_id', userId,
+    'dav_id', dav_id,
     'price', price,
     'price_type', price_type,
     'price_description', price_description,
@@ -26,11 +26,16 @@ const saveBid = async ({ vehicle_id, time_to_pickup, time_to_dropoff, price, pri
     'time_to_pickup', time_to_pickup,
     'time_to_dropoff', time_to_dropoff,
     'need_id', needId,
+    'stage', 'awaiting_award'
   );
 
   // Set TTL for bid
   setBidTTL(bidId);
-  return bidId;
+  return await getBid(bidId);
+};
+
+const updateBidStage = async (id, stage) => {
+  return await redis.hsetAsync(`bids:${id}`, 'stage', stage);
 };
 
 const getBid = async bidId => {
@@ -133,7 +138,7 @@ const generateBidFromVehicle = async (vehicle, pickup, dropoff, needId, userId) 
   // const origin = { lat: vehicle.coords.lat, long: vehicle.coords.long };
   let newBid = {};//randomBid(origin, pickup, dropoff);
   newBid.vehicle_id = vehicle.id;
-  const newBidId = await saveBid(newBid, needId, userId);
+  const newBidId = await addNewBid(newBid, needId, userId);
   newBid.id = newBidId;
   return newBid;
 };
@@ -147,9 +152,11 @@ const deleteBidsForNeed = async needId => {
 };
 
 module.exports = {
+  addNewBid,
   getBidsForNeed,
   getBid,
   deleteBidsForNeed,
+  updateBidStage
 };
 
 const setBidTTL = bidId => redis.expire(`bids:${bidId}`, config('bids_ttl'));

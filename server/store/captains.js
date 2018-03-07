@@ -1,31 +1,39 @@
 const redis = require('./redis');
-const uuid = require('uuid/v4');
 
-const addNewCaptain = async (needTypes, notificationURL) => {
-  const davId = uuid();
-  redis.hmsetAsync(`captains:${davId}`,
-    'id', davId,
-    'notification_url', notificationURL
+const addNewCaptain = async ({dav_id, notification_url}) => {
+  redis.hmsetAsync(`captains:${dav_id}`,
+    'id', dav_id,
+    'notification_url', notification_url
   );
 
-  Promise.all(needTypes.map(item => redis.saddAsync(`needTypes:${item.need_type}`, davId))); // adds this captain davId to the needType
+  return dav_id;
+};
 
+const addNeedTypeForCaptain = async ({dav_id, need_type, region}) => {
+  redis.saddAsync(`needTypes:${need_type}`, dav_id); // adds this captain davId to the needType
+  console.log(region); // just to get rid of the lint issues
+  return dav_id;
   // TODO: Save need types and region(s)
+};
 
-  return davId;
+
+const getCaptain = async davId => {
+  return await redis.hgetallAsync(`captains:${davId}`);
 };
 
 const getCaptainsForNeedType = async (needType) => {
   const davIds = await redis.smembersAsync(`needTypes:${needType}`);
-  const captains = await Promise.map(davIds.map((id) => {
+  const captains = await Promise.all(davIds.map((id) => {
     return redis.hgetallAsync(`captains:${id}`);
-  }));
+  })).then(captains => captains);
 
   return captains;
 };
 
 module.exports = {
   addNewCaptain,
-  getCaptainsForNeedType
+  getCaptain,
+  getCaptainsForNeedType,
+  addNeedTypeForCaptain
 };
 

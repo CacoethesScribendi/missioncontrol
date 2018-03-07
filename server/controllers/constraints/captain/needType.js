@@ -7,14 +7,20 @@ module.exports = {
       within: needTypes
     }
   },
-  'region.center_longitude': {
+  dav_id: {
+    presence: {
+      allowEmpty: false
+    },
+    type: 'string'
+  },
+  'region.longitude': {
     presence: true,
     numericality: {
       lessThanOrEqualTo: 180,
       greaterThanOrEqualTo: -180
     }
   },
-  'region.center_latitude': {
+  'region.latitude': {
     presence: true,
     numericality: {
       lessThanOrEqualTo: 90,

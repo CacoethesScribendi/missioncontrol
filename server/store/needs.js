@@ -13,6 +13,7 @@ const createNeed = async needDetails => {
   needDetails.need_type = needTypes[0]; // default to drone delivery for now
   // get new unique id for need
   const needId = await redis.incrAsync('next_need_id');
+  needDetails.id = needId;
   const key_value_array = [].concat(...Object.entries(needDetails));
   redis.hmsetAsync(`needs:${needId}`, ...key_value_array);
 

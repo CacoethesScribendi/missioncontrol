@@ -1,4 +1,10 @@
 module.exports = {
+  dav_id: {
+    presence: {
+      allowEmpty: false
+    },
+    type: 'string'
+  },
   need_id: {
     presence: {
       allowEmpty: false
