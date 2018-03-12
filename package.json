@@ -29,7 +29,8 @@
     "redis": "^2.8.0",
     "request": "^2.83.0",
     "thrift": "^0.11.0",
-    "uuid": "^3.2.1"
+    "uuid": "^3.2.1",
+    "lodash": "^4.17.5"
   },
   "devDependencies": {
     "gulp": "^3.9.1",

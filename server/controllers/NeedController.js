@@ -17,7 +17,16 @@ const create = async (req, res) => {
     });
     params.user_id = req.query.user_id;
     const needId = await createNeed(params);
-    notifyCaptains(needId);
+    const terminals = {
+      pickup: {
+        longitude: params.pickup_longitude,
+        latitude: params.pickup_latitude
+      }, dropoff: {
+        longitude: params.dropoff_longitude,
+        latitude: params.dropoff_latitude
+      }
+    };
+    notifyCaptains(needId, terminals);
     if (needId) {
       res.json({needId});
     } else {
@@ -26,9 +35,9 @@ const create = async (req, res) => {
   }
 };
 
-const notifyCaptains = async (needId) => {
+const notifyCaptains = async (needId, terminals) => {
   const need = await getNeed(needId);
-  const captains = await getCaptainsForNeedType(need.need_type);
+  const captains = await getCaptainsForNeedType(need.need_type, terminals);
   const notification = {
     notification_type: 'new_need',
     data: {

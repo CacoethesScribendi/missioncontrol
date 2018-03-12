@@ -28,8 +28,6 @@ services:
     networks:
       - dav
   aerospike:
-    # environment:
-      # NAMESPACE: mc
     image: aerospike/aerospike-server
     networks:
       - dav
