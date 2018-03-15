@@ -52,3 +52,5 @@ RUN npm install -g nodemon
 COPY . /app
 
 CMD [ "npm", "start" ]
+
+EXPOSE 8888
