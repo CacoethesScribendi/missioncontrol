@@ -6,6 +6,7 @@ const NeedController = require('./controllers/NeedController');
 const BidController = require('./controllers/BidController');
 const MissionController = require('./controllers/MissionController');
 const CaptainController = require('./controllers/CaptainController');
+const ContractController = require('./controllers/ContractController');
 
 // Create thrift connection to Captain
 require('./client-thrift').start({
@@ -42,6 +43,7 @@ app.post('/captains', CaptainController.create);
 app.post('/captains/:davId', CaptainController.registerNeedTypeForCaptain);
 
 app.post('/bids/:needId', BidController.create);
+app.post('/contracts/:bidId', ContractController.sign);
 
 module.exports = {
   start: () => {
