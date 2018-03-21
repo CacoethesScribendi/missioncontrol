@@ -65,6 +65,12 @@ module.exports = {
   },
   drone_model: {
     type: 'string'
+  },
+  ttl: {
+    numericality: {
+      onlyInteger: true,
+      strict: true
+    }
   }
 };
 

@@ -1,7 +1,6 @@
 const redis = require('./redis');
 const config = require('../config');
-// const {generateRandomVehicles} = require('../simulation/vehicles');
-// const {createVehicle} = require('../client-thrift');
+const { getBid, setBidVehicle } = require('../store/bids');
 
 const parseVehiclesArray = vehicles =>
   vehicles
@@ -18,25 +17,20 @@ const parseVehiclesArray = vehicles =>
     }));
 
 
-// TODO: remove simulation code from here
-/* const addNewVehicle = vehicle => {
+const addNewVehicle = async (bidId) => {
+
+  const bid = await getBid(bidId);
+  const vehicleId = await redis.incrAsync('next_vehicle_id');
+
   // Add to vehicles
-  redis.hmsetAsync(`vehicles:${vehicle.id}`,
-    'id', vehicle.id,
-    'model', vehicle.model,
-    'icon', vehicle.icon,
-    'missions_completed', vehicle.missions_completed,
-    'missions_completed_7_days', vehicle.missions_completed_7_days,
-    'status', vehicle.status,
+  redis.hmsetAsync(`vehicles:${vehicleId}`,
+    'id', vehicleId,
+    'model', bid.drone_model,
+    'icon', `https://lorempixel.com/100/100/abstract/?${vehicleId}`,
   );
 
-  updateVehiclePosition(vehicle);
-
-  // Set TTL for vehicles
-  setVehicleTTL(vehicle.id);
-  // Send new vehicle to Captain
-  createVehicle(vehicle);
-}; */
+  setBidVehicle(bidId, vehicleId);
+};
 
 const getVehicle = async id => {
   setVehicleTTL(id);
@@ -90,16 +84,16 @@ const getLatestPositionUpdate = async (vehicle) => {
 
 // returns the specific solo vehicle for bid creation
 /* const generateSoloVehicleForBid = (coords) => {
-  const vehicle = generateRandomVehicles(1, coords)[0];
-  addNewVehicle(vehicle);
-  return vehicle;
-}; */
+ const vehicle = generateRandomVehicles(1, coords)[0];
+ addNewVehicle(vehicle);
+ return vehicle;
+ }; */
 
 /* const generateAndAddVehicles = (count, coords, radius) =>
-  count > 0 && generateRandomVehicles(count, coords, radius)
-    .forEach(vehicle => {
-      addNewVehicle(vehicle);
-    }); */
+ count > 0 && generateRandomVehicles(count, coords, radius)
+ .forEach(vehicle => {
+ addNewVehicle(vehicle);
+ }); */
 
 const getVehiclesInRange = async (coords, radius) => {
   // const shortRangeRadius = radius / 7;
@@ -123,12 +117,12 @@ const getVehiclesInRange = async (coords, radius) => {
 };
 
 module.exports = {
-  // generateSoloVehicleForBid,
   getVehiclesInRange,
   getVehicle,
   getVehicles,
   updateVehicleStatus,
   updateVehiclePosition,
   getLatestPositionUpdate,
-  getPosition
+  getPosition,
+  addNewVehicle
 };

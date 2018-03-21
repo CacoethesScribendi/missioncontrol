@@ -1,5 +1,5 @@
 const cors = require('./middleware/cors');
-const getOrCreateUser = require('./middleware/getOrCreateUser');
+const getOrCreateUser = require('./middleware/getOrCreateRequester');
 
 const StatusController = require('./controllers/StatusController');
 const NeedController = require('./controllers/NeedController');
@@ -44,6 +44,8 @@ app.post('/captains/:davId', CaptainController.registerNeedTypeForCaptain);
 
 app.post('/bids/:needId', BidController.create);
 app.post('/contracts/:bidId', ContractController.sign);
+app.post('/missions/:bidId', MissionController.begin);
+app.put('/missions/:missionId', MissionController.update);
 
 module.exports = {
   start: () => {

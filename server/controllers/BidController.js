@@ -1,8 +1,6 @@
-const {getBidsForNeed, addNewBid, getBid, updateBidStage} = require('../store/bids');
+const {getBidsForNeed, addNewBid, getBid, updateBidStatus, setBidRequester} = require('../store/bids');
 const {getCaptain} = require('../store/captains');
 const {hasStore} = require('../lib/environment');
-const {createMission} = require('../store/missions');
-const {updateVehicleStatus} = require('../store/vehicles');
 const createConstraints = require('./constraints/bid/create');
 const validate = require('../lib/validate');
 const axios = require('axios');
@@ -31,21 +29,13 @@ const fetch = async (req, res) => {
 };
 
 const chooseBid = async (req, res) => {
-  const {user_id} = req.query;
+  const {requester_id} = req.query;
   const {bidId} = req.params;
-  await updateBidStage(bidId, 'awarded');
+  await updateBidStatus(bidId, 'awarded');
+  await setBidRequester(bidId, requester_id);
   const bid = await getBid(bidId);
   notifyCaptain(bid);
-  const mission = await createMission({
-    user_id,
-    bidId,
-  });
-  if (mission) {
-    await updateVehicleStatus(mission.vehicle_id, 'contract_received');
-    res.json({mission});
-  } else {
-    res.status(500).send('Something broke!');
-  }
+  res.status(200).send();
 };
 
 const notifyCaptain = async (bid) => {

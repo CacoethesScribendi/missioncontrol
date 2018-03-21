@@ -7,9 +7,9 @@ const { hasStore } = require('../lib/environment');
 // const {calculateNextCoordinate} = require('../simulation/vehicles');
 
 const getStatus = async (req, res) => {
-  const { lat, long, needId, user_id } = req.query;
+  const { lat, long, needId, requester_id } = req.query;
   const status = 'idle';
-  const latestMission = await getLatestMission(user_id);
+  const latestMission = await getLatestMission(requester_id);
   const bids = (!hasStore() || !needId) ? [] : await getBidsForNeed(needId);
   let vehicles = [];
   if (hasStore()) {

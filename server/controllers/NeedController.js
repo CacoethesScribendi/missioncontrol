@@ -15,7 +15,7 @@ const create = async (req, res) => {
     Object.keys(params).forEach(key => {
       if (!allowedParamsKeys.includes(key)) delete params[key];
     });
-    params.user_id = req.query.user_id;
+    params.requester_id = req.query.requester_id;
     const needId = await createNeed(params);
     const terminals = {
       pickup: {
