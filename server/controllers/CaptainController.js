@@ -10,7 +10,7 @@ const create = async (req, res) => {
     res.status(422).json(validationErrors);
   } else {
     const davId = await addNewCaptain(params);
-    res.json({ dav_id: davId });
+    res.status(200).json({dav_id: davId});
   }
 };
 
