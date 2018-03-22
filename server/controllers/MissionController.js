@@ -1,5 +1,5 @@
 const {getMission, updateMission, createMission} = require('../store/missions');
-const {updateVehiclePosition, getVehicle } = require('../store/vehicles');
+const {updateVehiclePosition, getVehicle} = require('../store/vehicles');
 const {getBid} = require('../store/bids');
 const {createMissionUpdate} = require('../store/mission_updates');
 const {getCaptain} = require('../store/captains');
@@ -24,7 +24,6 @@ const begin = async (req, res) => {
       await updateVehiclePosition(mission.vehicle, params.longitude, params.latitude);
       mission = await getMission(mission.mission_id); //refresh mission
       if (mission) {
-        console.log(mission);
         res.json({mission});
       } else {
         res.status(500).send('Something broke!');
@@ -40,8 +39,8 @@ const update = async (req, res) => {
   if (validationErrors) {
     res.status(422).json(validationErrors);
   } else {
-    let mission = await getMission(missionId);
-    if ((mission.status !== 'started') || (mission.dav_id !== params.dav_id)){
+    let mission = await getMission(missionId); // redis.hgetallAsync(`missions:${missionId}`); returns null at this point
+    if ((mission.status !== 'started') || (mission.dav_id !== params.dav_id)) {
       res.status(401).send('Unauthorized');
     } else {
       const vehicle = await getVehicle(mission.vehicle_id);

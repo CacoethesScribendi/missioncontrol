@@ -48,7 +48,8 @@ const createMission = async (bidId) => {
   createMissionUpdate(missionId, 'started');
 
   // create a new mission entry in Redis
-  redis.hmsetAsync(`missions:${missionId}`,
+  await redis.hmsetAsync(`missions:${missionId}`,
+    'mission_id', missionId,
     'requester_id', requester_id,
     'vehicle_id', vehicle_id,
     'price', price,
@@ -68,25 +69,7 @@ const createMission = async (bidId) => {
     'status', status,
   );
 
-  const vehicle = await getVehicle(vehicle_id);
-
-  return {
-    mission_id: missionId,
-    vehicle_id,
-    price,
-    time_to_pickup,
-    time_to_dropoff,
-    pickup_latitude,
-    pickup_longitude,
-    dropoff_latitude,
-    dropoff_longitude,
-    pickup_at,
-    cargo_type,
-    weight,
-    started_at,
-    status,
-    vehicle
-  };
+  return await getMission(missionId);
 };
 
 module.exports = {
