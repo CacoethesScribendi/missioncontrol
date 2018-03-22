@@ -12,6 +12,9 @@ down:
 flush:
 	@docker exec -it missioncontrol_redis_1 redis-cli FLUSHALL
 
+aql:
+	@docker exec -it missioncontrol_aerospike_1 aql
+
 log:
 	@docker logs missioncontrol_missioncontrol_1 -f
 
