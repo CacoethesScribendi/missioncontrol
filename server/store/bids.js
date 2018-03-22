@@ -28,8 +28,8 @@ const addNewBid = async (bid, needId) => {
     'status', 'awaitingAward'
   );
 
-  // Set TTL for bid
-  setBidTTL(bidId, bid.ttl);
+  if (bid.ttl) setBidTTL(bidId, bid.ttl);
+
   return await getBid(bidId);
 };
 

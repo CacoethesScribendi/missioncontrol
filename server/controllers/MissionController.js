@@ -24,6 +24,7 @@ const begin = async (req, res) => {
       await updateVehiclePosition(mission.vehicle, params.longitude, params.latitude);
       mission = await getMission(mission.mission_id); //refresh mission
       if (mission) {
+        console.log(mission);
         res.json({mission});
       } else {
         res.status(500).send('Something broke!');
