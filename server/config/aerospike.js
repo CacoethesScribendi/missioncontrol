@@ -5,5 +5,5 @@ module.exports = {
       hosts: [{addr: address, port: 3000}],
     };
   },
-  namespace: 'test'
+  namespace: 'mission_controller'
 };

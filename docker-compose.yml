@@ -31,6 +31,8 @@ services:
       - dav
   aerospike:
     image: aerospike/aerospike-server
+    environment:
+      NAMESPACE: mission_controller
     networks:
       - dav
 networks:
