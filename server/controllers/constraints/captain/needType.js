@@ -14,23 +14,23 @@ module.exports = {
     type: 'string'
   },
   'region.longitude': {
-    presence: true,
     numericality: {
       lessThanOrEqualTo: 180,
       greaterThanOrEqualTo: -180
     }
   },
   'region.latitude': {
-    presence: true,
     numericality: {
       lessThanOrEqualTo: 90,
       greaterThanOrEqualTo: -90
     }
   },
   'region.radius': {
-    presence: true,
     numericality: {
       greaterThan: 0
     }
+  },
+  'region.global': {
+    type: 'boolean'
   }
 };
