@@ -4,7 +4,9 @@ const Aerospike = require('aerospike');
 const GeoJSON = Aerospike.GeoJSON;
 const filter = Aerospike.filter;
 const aerospike = Aerospike.client(aerospikeConfig());
-const _ = require('lodash');
+const Rx = require('rxjs/Rx');
+
+const MAX_LOCAL_RADIUS = 10e5;
 
 
 const addNewCaptain = async ({ dav_id, notification_url }) => {
@@ -18,12 +20,13 @@ const addNewCaptain = async ({ dav_id, notification_url }) => {
 
 const addNeedTypeForCaptain = async ({ dav_id, need_type, region }) => {
   await redis.saddAsync(`needTypes:${need_type}`, dav_id); // adds this captain davId to the needType
+  await addNeedTypeIndexes(need_type);
   await aerospike.connect();
-  await createRegionIndex(need_type);
   let key = new Aerospike.Key(namespace, need_type, dav_id);
   let bins = {
     dav_id: dav_id,
-    region: new GeoJSON({ type: 'AeroCircle', coordinates: [[region.longitude, region.latitude], region.radius] })
+    global: region.radius > MAX_LOCAL_RADIUS ? 1 : 0,
+    region: new GeoJSON({ type: 'AeroCircle', coordinates: [[region.longitude, region.latitude], Math.max(region.radius, MAX_LOCAL_RADIUS)] })
   };
   let policy = new Aerospike.WritePolicy({
     exists: Aerospike.policy.exists.CREATE_OR_REPLACE
@@ -32,17 +35,42 @@ const addNeedTypeForCaptain = async ({ dav_id, need_type, region }) => {
   return dav_id;
 };
 
-const createRegionIndex = async (need_type) => {
-  var options = {
-    ns: namespace,
-    set: need_type,
-    bin: 'region',
-    index: `idx_${namespace}_${need_type}_region`,
-    datatype: Aerospike.indexDataType.GEO2DSPHERE
-  };
+const addNeedToCaptain = async (davId, needId) => {
+  let policy = new Aerospike.WritePolicy({
+    exists: Aerospike.policy.exists.CREATE_OR_REPLACE
+  });
+  await aerospike.connect();
+  let key = new Aerospike.Key(namespace, 'needs', davId);
+  let captainNeeds = (await aerospike.get(key, policy)).bins;
+  if (!captainNeeds) {
+    captainNeeds = {
+      dav_id: davId,
+      needs: []
+    };
+  }
+  captainNeeds.needs.push(needId);
+  await aerospike.put(key, captainNeeds, {}, policy);
+  return davId;
+};
 
+const getNeeds = async (davId) => {
+  let policy = new Aerospike.WritePolicy({
+    exists: Aerospike.policy.exists.CREATE_OR_REPLACE
+  });
+  await aerospike.connect();
+  let key = new Aerospike.Key(namespace, 'needs', davId);
+  return (await aerospike.get(key, policy)).bins;
+};
+
+const createIndex = async (set, bin, type) => {
   try {
-    await aerospike.createIndex(options);
+    await aerospike.createIndex({
+      ns: namespace,
+      set: set,
+      bin: bin,
+      index: `idx_${namespace}_${set}_${bin}`,
+      datatype: type
+    });
   } catch (error) {
     if (error.message.match(/Index .* already exists/).length === 0) {
       console.log(error);
@@ -50,61 +78,65 @@ const createRegionIndex = async (need_type) => {
   }
 };
 
+const addNeedTypeIndexes = async (needType) => {
+  await createIndex(needType, 'region', Aerospike.indexDataType.GEO2DSPHERE);
+  await createIndex(needType, 'global', Aerospike.indexDataType.NUMERIC);
+};
 
 const getCaptain = async davId => {
   return await redis.hgetallAsync(`captains:${davId}`);
 };
 
-const getCaptainsForNeedType = (needType, { pickup, dropoff }) => {
+const getCaptainsForNeedType = (needType, { pickup/* , dropoff */ }) => {
   return new Promise(async (resolve, reject) => {
-
     try {
-      const pickupResults = [];
-      const dropoffResults = [];
       const client = await aerospike.connect();
-      const pickupStream = geoQueryStreamForTerminal(pickup, needType, client);
-
-      pickupStream.on('data', (pickupRecord) => {
-        pickupResults.push(pickupRecord.bins.dav_id);
-      });
-
-      pickupStream.on('end', () => {
-        const dropoffStream = geoQueryStreamForTerminal(dropoff, needType, client);
-
-        dropoffStream.on('data', (dropoffRecord) => {
-          dropoffResults.push(dropoffRecord.bins.dav_id);
-        });
-
-        dropoffStream.on('end', async () => {
-          const davIds = _.intersection(dropoffResults, pickupResults);
+      geoQueryStreamForTerminal(pickup, needType, client)
+        .toArray()
+        .subscribe(async davIds => {
           const captains = await Promise.all(davIds.map((id) => {
             return redis.hgetallAsync(`captains:${id}`);
           })).then(captains => captains);
-
           resolve(captains);
         });
-      });
-
     } catch (err) {
       reject(err);
     }
-
   });
 };
 
-const geoQueryStreamForTerminal = (terminal, needType) => {
-  const geoFilters = [];
-  geoFilters.push(filter.geoContainsPoint('region', terminal.longitude, terminal.latitude));
-  const args = { filters: geoFilters };
-  const query = aerospike.query(namespace, needType, args);
+const query = (set, filters) => {
+  let subject = new Rx.Subject();
+  const query = aerospike.query(namespace, set, { filters: filters });
   const stream = query.foreach();
-  return stream;
+
+  stream.on('data', (record) => {
+    subject.next(record);
+  });
+
+  stream.on('error', (error) => {
+    subject.error(error);
+  });
+  stream.on('end', () => {
+    subject.complete();
+  });
+  return subject;
+};
+
+const geoQueryStreamForTerminal = (terminal, needType) => {
+  return Rx.Observable.merge(
+    query(needType, [filter.geoContainsPoint('region', terminal.longitude, terminal.latitude)]),
+    query(needType, [filter.equal('global', 1)])
+  )
+    .map(record => record.bins.dav_id);
 };
 
 module.exports = {
   addNewCaptain,
   getCaptain,
   getCaptainsForNeedType,
-  addNeedTypeForCaptain
+  addNeedTypeForCaptain,
+  addNeedToCaptain,
+  getNeeds
 };
 

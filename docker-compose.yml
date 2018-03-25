@@ -35,6 +35,8 @@ services:
       NAMESPACE: mission_controller
     networks:
       - dav
+    ports:
+      - '3000:3000'
 networks:
   dav:
     external: true

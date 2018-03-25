@@ -1,9 +1,8 @@
-const {createNeed, getNeed, deleteNeed} = require('../store/needs');
-const {deleteBidsForNeed} = require('../store/bids');
-const {getCaptainsForNeedType} = require('../store/captains');
+const { createNeed, getNeed, deleteNeed } = require('../store/needs');
+const { deleteBidsForNeed } = require('../store/bids');
+const { getCaptainsForNeedType, addNeedToCaptain, getNeeds } = require('../store/captains');
 const createConstraints = require('./constraints/need/create');
 const validate = require('../lib/validate');
-const axios = require('axios');
 
 const create = async (req, res) => {
   const params = req.body;
@@ -28,7 +27,7 @@ const create = async (req, res) => {
     };
     notifyCaptains(needId, terminals);
     if (needId) {
-      res.json({needId});
+      res.json({ needId });
     } else {
       res.status(500).send('Something broke!');
     }
@@ -38,19 +37,12 @@ const create = async (req, res) => {
 const notifyCaptains = async (needId, terminals) => {
   const need = await getNeed(needId);
   const captains = await getCaptainsForNeedType(need.need_type, terminals);
-  const notification = {
-    notification_type: 'new_need',
-    data: {
-      need: need
-    }
-  };
-
-  Promise.all(captains.map(captain => axios.post(captain.notification_url, notification)));
+  await Promise.all(captains.map(async captain => await addNeedToCaptain(captain.dav_id)));
 };
 
 
 const cancel = async (req, res) => {
-  const {needId} = req.params;
+  const { needId } = req.params;
   const need = await getNeed(needId);
   if (need) {
     await deleteNeed(need);
@@ -61,5 +53,11 @@ const cancel = async (req, res) => {
   }
 };
 
+const getForCaptain = async (req, res) => {
+  const { davId } = req.params;
+  const needs = await getNeeds(davId);
+  res.send(needs);
+};
 
-module.exports = {create, cancel};
+
+module.exports = { create, cancel, getForCaptain };

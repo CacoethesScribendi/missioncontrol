@@ -41,13 +41,14 @@ RUN npm install aerospike@${AS_NODEJS_VERSION}
 
 # Build MissionControl
 FROM node:9.3.0-alpine
+RUN npm install -g nodemon
+
 WORKDIR /app
 
 COPY package.json /app/
 COPY --from=node-builder /src/node_modules/ node_modules/
 
 RUN npm install
-RUN npm install -g nodemon
 
 COPY . /app
 
