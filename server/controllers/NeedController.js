@@ -40,9 +40,8 @@ const create = async (req, res) => {
 const notifyCaptains = async (needId, terminals) => {
   const need = await getNeed(needId);
   const captains = await getCaptainsForNeedType(need.need_type, terminals);
-  await Promise.all(captains.map(async captain => await addNeedToCaptain(captain.id)));
+  await Promise.all(captains.map(async captain => await addNeedToCaptain(captain.id, needId)));
 };
-
 
 const cancel = async (req, res) => {
   const { needId } = req.params;
@@ -57,8 +56,9 @@ const cancel = async (req, res) => {
 };
 
 const getForCaptain = async (req, res) => {
-  const { davId } = req.params;
-  const needs = await getNeeds(davId);
+  let { davId } = req.params;
+  let needs = await getNeeds(davId);
+  needs = await Promise.all(needs.map(async needId => await getNeed(needId)));
   res.send(needs);
 };
 

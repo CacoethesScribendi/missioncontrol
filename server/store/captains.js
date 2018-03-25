@@ -26,7 +26,7 @@ const addNeedTypeForCaptain = async ({ dav_id, need_type, region }) => {
   let bins = {
     dav_id: dav_id,
     global: region.radius > MAX_LOCAL_RADIUS ? 1 : 0,
-    region: new GeoJSON({ type: 'AeroCircle', coordinates: [[region.longitude, region.latitude], Math.max(region.radius, MAX_LOCAL_RADIUS)] })
+    region: new GeoJSON({ type: 'AeroCircle', coordinates: [[region.longitude, region.latitude], Math.min(region.radius, MAX_LOCAL_RADIUS)] })
   };
   let policy = new Aerospike.WritePolicy({
     exists: Aerospike.policy.exists.CREATE_OR_REPLACE
@@ -57,7 +57,8 @@ const getNeeds = async (davId) => {
     });
     await aerospike.connect();
     let key = new Aerospike.Key(namespace, 'needs', davId);
-    return (await aerospike.get(key, policy)).bins.needs;
+    let res = await aerospike.get(key, policy);
+    return res.bins.needs;
   }
   catch (error) {
     if (error.message.includes('Record does not exist in database')) {
@@ -69,6 +70,7 @@ const getNeeds = async (davId) => {
 
 const createIndex = async (set, bin, type) => {
   try {
+    await aerospike.connect();
     await aerospike.createIndex({
       ns: namespace,
       set: set,
@@ -77,8 +79,12 @@ const createIndex = async (set, bin, type) => {
       datatype: type
     });
   } catch (error) {
-    if (error.message.match(/Index .* already exists/).length === 0) {
+    if (error.message.includes('Index with the same name already exists')) {
+      return;
+    }
+    else {
       console.log(error);
+      throw error;
     }
   }
 };
