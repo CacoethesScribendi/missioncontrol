@@ -36,30 +36,35 @@ const addNeedTypeForCaptain = async ({ dav_id, need_type, region }) => {
 };
 
 const addNeedToCaptain = async (davId, needId) => {
+  let captainNeeds = {
+    dav_id: davId,
+    needs: await getNeeds(davId)
+  };
+  captainNeeds.needs.push(needId);
   let policy = new Aerospike.WritePolicy({
     exists: Aerospike.policy.exists.CREATE_OR_REPLACE
   });
   await aerospike.connect();
   let key = new Aerospike.Key(namespace, 'needs', davId);
-  let captainNeeds = (await aerospike.get(key, policy)).bins;
-  if (!captainNeeds) {
-    captainNeeds = {
-      dav_id: davId,
-      needs: []
-    };
-  }
-  captainNeeds.needs.push(needId);
   await aerospike.put(key, captainNeeds, {}, policy);
   return davId;
 };
 
 const getNeeds = async (davId) => {
-  let policy = new Aerospike.WritePolicy({
-    exists: Aerospike.policy.exists.CREATE_OR_REPLACE
-  });
-  await aerospike.connect();
-  let key = new Aerospike.Key(namespace, 'needs', davId);
-  return (await aerospike.get(key, policy)).bins;
+  try {
+    let policy = new Aerospike.WritePolicy({
+      exists: Aerospike.policy.exists.CREATE_OR_REPLACE
+    });
+    await aerospike.connect();
+    let key = new Aerospike.Key(namespace, 'needs', davId);
+    return (await aerospike.get(key, policy)).bins.needs;
+  }
+  catch (error) {
+    if (error.message.includes('Record does not exist in database')) {
+      return [];
+    }
+    throw error;
+  }
 };
 
 const createIndex = async (set, bin, type) => {
@@ -94,10 +99,11 @@ const getCaptainsForNeedType = (needType, { pickup/* , dropoff */ }) => {
       geoQueryStreamForTerminal(pickup, needType, client)
         .toArray()
         .subscribe(async davIds => {
-          const captains = await Promise.all(davIds.map((id) => {
+          await (Promise.all(davIds.map((id) => {
             return redis.hgetallAsync(`captains:${id}`);
-          })).then(captains => captains);
-          resolve(captains);
+          })))
+            .then(captains =>
+              resolve(captains));
         });
     } catch (err) {
       reject(err);

@@ -10,25 +10,28 @@ const create = async (req, res) => {
   if (validationErrors) {
     res.status(422).json(validationErrors);
   } else {
-    const allowedParamsKeys = Object.keys(createConstraints);
-    Object.keys(params).forEach(key => {
-      if (!allowedParamsKeys.includes(key)) delete params[key];
-    });
-    params.requester_id = req.query.requester_id;
-    const needId = await createNeed(params);
-    const terminals = {
-      pickup: {
-        longitude: params.pickup_longitude,
-        latitude: params.pickup_latitude
-      }, dropoff: {
-        longitude: params.dropoff_longitude,
-        latitude: params.dropoff_latitude
-      }
-    };
-    notifyCaptains(needId, terminals);
-    if (needId) {
+    try {
+
+      const allowedParamsKeys = Object.keys(createConstraints);
+      Object.keys(params).forEach(key => {
+        if (!allowedParamsKeys.includes(key)) delete params[key];
+      });
+      params.requester_id = req.query.requester_id;
+      const needId = await createNeed(params);
+      const terminals = {
+        pickup: {
+          longitude: params.pickup_longitude,
+          latitude: params.pickup_latitude
+        }, dropoff: {
+          longitude: params.dropoff_longitude,
+          latitude: params.dropoff_latitude
+        }
+      };
+      await notifyCaptains(needId, terminals);
       res.json({ needId });
-    } else {
+    }
+    catch (error) {
+      console.error(error);
       res.status(500).send('Something broke!');
     }
   }
@@ -37,7 +40,7 @@ const create = async (req, res) => {
 const notifyCaptains = async (needId, terminals) => {
   const need = await getNeed(needId);
   const captains = await getCaptainsForNeedType(need.need_type, terminals);
-  await Promise.all(captains.map(async captain => await addNeedToCaptain(captain.dav_id)));
+  await Promise.all(captains.map(async captain => await addNeedToCaptain(captain.id)));
 };
 
 
