@@ -101,7 +101,7 @@ const getCaptain = async davId => {
 const getCaptainsForNeedType = (needType, { pickup/* , dropoff */ }) => {
   return new Promise(async (resolve, reject) => {
     try {
-      const client = await aerospike.connect();
+      let client = await aerospike.connect();
       geoQueryStreamForTerminal(pickup, needType, client)
         .toArray()
         .subscribe(async davIds => {
@@ -119,8 +119,8 @@ const getCaptainsForNeedType = (needType, { pickup/* , dropoff */ }) => {
 
 const query = (set, filters) => {
   let subject = new Rx.Subject();
-  const query = aerospike.query(namespace, set, { filters: filters });
-  const stream = query.foreach();
+  let query = aerospike.query(namespace, set, { filters: filters });
+  let stream = query.foreach();
 
   stream.on('data', (record) => {
     subject.next(record);
