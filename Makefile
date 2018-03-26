@@ -8,6 +8,7 @@ up: build
 
 down:
 	@docker-compose down
+	@docker rm missioncontrol_aerospike_1
 
 flush:
 	@docker exec -it missioncontrol_redis_1 redis-cli FLUSHALL

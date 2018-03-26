@@ -1,17 +1,17 @@
 const { createNeed, getNeed, deleteNeed } = require('../store/needs');
 const { deleteBidsForNeed } = require('../store/bids');
-const { getCaptainsForNeedType, addNeedToCaptain, getNeeds } = require('../store/captains');
+const { getCaptainsForNeedType, addNeedToCaptain, getNeeds} = require('../store/captains');
 const createConstraints = require('./constraints/need/create');
 const validate = require('../lib/validate');
 
 const create = async (req, res) => {
   let params = req.body;
+  params.ttl = params.ttl || 120;
   let validationErrors = validate(params, createConstraints);
   if (validationErrors) {
     res.status(422).json(validationErrors);
   } else {
     try {
-
       let allowedParamsKeys = Object.keys(createConstraints);
       Object.keys(params).forEach(key => {
         if (!allowedParamsKeys.includes(key)) delete params[key];
@@ -27,7 +27,7 @@ const create = async (req, res) => {
           latitude: params.dropoff_latitude
         }
       };
-      await notifyCaptains(needId, terminals);
+      await notifyCaptains(needId, terminals, params.ttl);
       res.json({ needId });
     }
     catch (error) {
@@ -37,10 +37,10 @@ const create = async (req, res) => {
   }
 };
 
-const notifyCaptains = async (needId, terminals) => {
+const notifyCaptains = async (needId, terminals, ttl) => {
   let need = await getNeed(needId);
   let captains = await getCaptainsForNeedType(need.need_type, terminals);
-  await Promise.all(captains.map(async captain => await addNeedToCaptain(captain.id, needId)));
+  await Promise.all(captains.map(async captain => await addNeedToCaptain(captain.id, needId, ttl)));
 };
 
 const cancel = async (req, res) => {

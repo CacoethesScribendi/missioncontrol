@@ -18,7 +18,6 @@ const parseVehiclesArray = vehicles =>
 
 
 const addNewVehicle = async (bidId) => {
-
   const bid = await getBid(bidId);
   const vehicleId = await redis.incrAsync('next_vehicle_id');
 

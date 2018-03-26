@@ -31,11 +31,11 @@ const addNeedTypeForCaptain = async ({ dav_id, need_type, region }) => {
   let policy = new Aerospike.WritePolicy({
     exists: Aerospike.policy.exists.CREATE_OR_REPLACE
   });
-  await aerospike.put(key, bins, {}, policy);
+  await aerospike.put(key, bins, { ttl: region.ttl }, policy);
   return dav_id;
 };
 
-const addNeedToCaptain = async (davId, needId) => {
+const addNeedToCaptain = async (davId, needId, ttl) => {
   let captainNeeds = {
     dav_id: davId,
     needs: await getNeeds(davId)
@@ -46,7 +46,22 @@ const addNeedToCaptain = async (davId, needId) => {
   });
   await aerospike.connect();
   let key = new Aerospike.Key(namespace, 'needs', davId);
-  await aerospike.put(key, captainNeeds, {}, policy);
+  await aerospike.put(key, captainNeeds, { ttl: ttl }, policy);
+  return davId;
+};
+
+const addBidToCaptain = async (davId, bidId, ttl) => {
+  let captainBids = {
+    dav_id: davId,
+    bids: await getBids(davId)
+  };
+  captainBids.bids.push(bidId);
+  let policy = new Aerospike.WritePolicy({
+    exists: Aerospike.policy.exists.CREATE_OR_REPLACE
+  });
+  await aerospike.connect();
+  let key = new Aerospike.Key(namespace, 'bids', davId);
+  await aerospike.put(key, captainBids, { ttl: ttl }, policy);
   return davId;
 };
 
@@ -59,6 +74,24 @@ const getNeeds = async (davId) => {
     let key = new Aerospike.Key(namespace, 'needs', davId);
     let res = await aerospike.get(key, policy);
     return res.bins.needs;
+  }
+  catch (error) {
+    if (error.message.includes('Record does not exist in database')) {
+      return [];
+    }
+    throw error;
+  }
+};
+
+const getBids = async (davId) => {
+  try {
+    let policy = new Aerospike.WritePolicy({
+      exists: Aerospike.policy.exists.CREATE_OR_REPLACE
+    });
+    await aerospike.connect();
+    let key = new Aerospike.Key(namespace, 'bids', davId);
+    let res = await aerospike.get(key, policy);
+    return res.bins.bids;
   }
   catch (error) {
     if (error.message.includes('Record does not exist in database')) {
@@ -150,6 +183,8 @@ module.exports = {
   getCaptainsForNeedType,
   addNeedTypeForCaptain,
   addNeedToCaptain,
-  getNeeds
+  addBidToCaptain,
+  getNeeds,
+  getBids
 };
 

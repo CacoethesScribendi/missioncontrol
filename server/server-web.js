@@ -33,7 +33,9 @@ app.post('/needs', NeedController.create);
 app.get('/needs/:davId', NeedController.getForCaptain);
 app.delete('/needs/:needId', NeedController.cancel);
 
+app.post('/bids/:needId', BidController.create);
 app.get('/bids/:needId', BidController.fetch);
+app.get('/bids/:davId/chosen', BidController.fetchChosen);
 app.put('/bids/:bidId/choose', BidController.chooseBid);
 
 app.get('/mission_command', MissionController.command);
@@ -43,7 +45,6 @@ app.get('/mission_command', MissionController.command);
 app.post('/captains', CaptainController.create);
 app.post('/captains/:davId', CaptainController.registerNeedTypeForCaptain);
 
-app.post('/bids/:needId', BidController.create);
 app.post('/contracts/:bidId', ContractController.sign);
 app.post('/missions/:bidId', MissionController.begin);
 app.put('/missions/:missionId', MissionController.update);
