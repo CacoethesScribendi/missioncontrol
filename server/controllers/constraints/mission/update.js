@@ -15,7 +15,7 @@ module.exports = {
   },
   status: {
     inclusion: {
-      within: ['atPickup', 'movingToPickup', 'atDropoff', 'movingToDropoff'],
+      within: ['movingToPickup', 'atPickup', 'movingToDropoff', 'atDropoff'],
     }
   },
   dav_id: {
