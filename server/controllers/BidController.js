@@ -1,6 +1,5 @@
 const {getBidsForNeed, addNewBid, getBid, updateBidStatus, setBidRequester} = require('../store/bids');
-const {getBids} = require('../store/bids');
-const {addBidToCaptain} = require('../store/captains');
+const {addBidToCaptain,getBids} = require('../store/captains');
 const {addNewVehicle} = require('../store/vehicles');
 const {hasStore} = require('../lib/environment');
 const createConstraints = require('./constraints/bid/create');
@@ -41,6 +40,7 @@ const chooseBid = async (req, res) => {
   await addBidToCaptain(bid.dav_id, bidId);
   res.status(200).send();
 };
+
 const fetchChosen = async (req, res) => {
   const {davId} = req.params;
   const bids = await getBids(davId);
