@@ -49,6 +49,8 @@ app.put('/captains/:davId', CaptainController.registerNeedTypeForCaptain);
 app.post('/contracts/:bidId', ContractController.sign);
 app.post('/missions/:bidId', MissionController.begin);
 app.put('/missions/:missionId', MissionController.update);
+app.get('/missions/:missionId', MissionController.fetch);
+
 
 module.exports = {
   start: () => {

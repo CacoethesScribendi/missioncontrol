@@ -56,7 +56,7 @@ const getBidsForNeed = async needId => {
     }),
   );
 
-  return bids;
+  return bids.filter(bid=>bid!=null);
 };
 
 

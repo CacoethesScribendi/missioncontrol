@@ -1,6 +1,6 @@
 const { createNeed, getNeed, deleteNeed } = require('../store/needs');
 const { deleteBidsForNeed } = require('../store/bids');
-const { getCaptainsForNeedType, addNeedToCaptain, getNeeds} = require('../store/captains');
+const { getCaptainsForNeedType, addNeedToCaptain, getNeeds } = require('../store/captains');
 const createConstraints = require('./constraints/need/create');
 const validate = require('../lib/validate');
 
@@ -27,7 +27,8 @@ const create = async (req, res) => {
           latitude: params.dropoff_latitude
         }
       };
-      await notifyCaptains(needId, terminals, params.ttl);
+      let captains = await getCaptainsForNeedType(params.need_type, terminals);
+      await Promise.all(captains.map(async captain => await addNeedToCaptain(captain.id, needId, params.ttl)));
       res.json({ needId });
     }
     catch (error) {
@@ -35,12 +36,6 @@ const create = async (req, res) => {
       res.status(500).send('Something broke!');
     }
   }
-};
-
-const notifyCaptains = async (needId, terminals, ttl) => {
-  let need = await getNeed(needId);
-  let captains = await getCaptainsForNeedType(need.need_type, terminals);
-  await Promise.all(captains.map(async captain => await addNeedToCaptain(captain.id, needId, ttl)));
 };
 
 const cancel = async (req, res) => {
@@ -56,10 +51,16 @@ const cancel = async (req, res) => {
 };
 
 const getForCaptain = async (req, res) => {
-  let { davId } = req.params;
-  let needs = await getNeeds(davId);
-  needs = await Promise.all(needs.map(async needId => await getNeed(needId)));
-  res.send(needs);
+  try {
+    let { davId } = req.params;
+    let needs = await getNeeds(davId);
+    needs = await Promise.all(needs.map(async needId => await getNeed(needId)));
+    res.send(needs.filter(need=>need!=null));
+  }
+  catch (error) {
+    console.error(error);
+    res.status(500).send('Something broke!');
+  }
 };
 
 

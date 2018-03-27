@@ -143,6 +143,9 @@ const getCaptainsForNeedType = (needType, { pickup/* , dropoff */ }) => {
           })))
             .then(captains =>
               resolve(captains));
+        }, (error) => {
+          console.error(error);
+          resolve([]);
         });
     } catch (err) {
       reject(err);
