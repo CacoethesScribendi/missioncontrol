@@ -32,7 +32,7 @@ services:
   aerospike:
     image: aerospike/aerospike-server
     environment:
-      NAMESPACE: mission_controller
+      NAMESPACE: test
     networks:
       - dav
     ports:

@@ -1,7 +1,10 @@
 const redis = require('./redis');
 // const config = require('../config');
 // const { randomBid } = require('../simulation/vehicles');
+const { aerospikeConfig, namespace } = require('../config/aerospike');
 const {getNeed} = require('./needs');
+const Aerospike = require('aerospike');
+const aerospike = Aerospike.client(aerospikeConfig());
 
 const addNewBid = async (bid, needId) => {
   // get new unique id for bid
@@ -45,6 +48,30 @@ const getBid = async bidId => {
   return await redis.hgetallAsync(`bids:${bidId}`);
 };
 
+const getBids = async (davId) => {
+  const ids = await getBidsIds(davId);
+  const bids = await Promise.all(ids.map(bidId => getBid(bidId)));
+  return bids;
+};
+
+const getBidsIds = async (davId) => {
+  try {
+    let policy = new Aerospike.WritePolicy({
+      exists: Aerospike.policy.exists.CREATE_OR_REPLACE
+    });
+    await aerospike.connect();
+    let key = new Aerospike.Key(namespace, 'bids', davId);
+    let res = await aerospike.get(key, policy);
+    return res.bins.bids;
+  }
+  catch (error) {
+    if (error.message.includes('Record does not exist in database')) {
+      return [];
+    }
+    throw error;
+  }
+};
+
 const getBidsForNeed = async needId => {
   // get request details
   const need = await getNeed(needId);
@@ -77,7 +104,8 @@ module.exports = {
   deleteBidsForNeed,
   updateBidStatus,
   setBidVehicle,
-  setBidRequester
+  setBidRequester,
+  getBids
 };
 
 const setBidTTL = (bidId, ttl) => redis.expire(`bids:${bidId}`, ttl);
