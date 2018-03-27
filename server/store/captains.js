@@ -83,24 +83,6 @@ const getNeeds = async (davId) => {
   }
 };
 
-const getBids = async (davId) => {
-  try {
-    let policy = new Aerospike.WritePolicy({
-      exists: Aerospike.policy.exists.CREATE_OR_REPLACE
-    });
-    await aerospike.connect();
-    let key = new Aerospike.Key(namespace, 'bids', davId);
-    let res = await aerospike.get(key, policy);
-    return res.bins.bids;
-  }
-  catch (error) {
-    if (error.message.includes('Record does not exist in database')) {
-      return [];
-    }
-    throw error;
-  }
-};
-
 const createIndex = async (set, bin, type) => {
   try {
     await aerospike.connect();
@@ -184,7 +166,6 @@ module.exports = {
   addNeedTypeForCaptain,
   addNeedToCaptain,
   addBidToCaptain,
-  getNeeds,
-  getBids
+  getNeeds
 };
 

@@ -1,5 +1,5 @@
 const { getBidsForNeed, addNewBid, getBid, updateBidStatus, setBidRequester } = require('../store/bids');
-const { getBids, addBidToCaptain } = require('../store/captains');
+const { getBids, addBidToCaptain } = require('../store/bids');
 const { addNewVehicle } = require('../store/vehicles');
 const { hasStore } = require('../lib/environment');
 const createConstraints = require('./constraints/bid/create');
@@ -16,7 +16,6 @@ const create = async (req, res) => {
   } else {
     let bid = await addNewBid(params, needId);
     await addNewVehicle(bid.id);
-
     bid = await getBid(bid.id);
     if (bid) {
       res.json(bid);
