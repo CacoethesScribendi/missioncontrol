@@ -1,7 +1,10 @@
 const redis = require('./redis');
 // const config = require('../config');
 // const { randomBid } = require('../simulation/vehicles');
+const { aerospikeConfig } = require('../config/aerospike');
 const {getNeed} = require('./needs');
+const Aerospike = require('aerospike');
+const aerospike = Aerospike.client(aerospikeConfig());
 
 const addNewBid = async (bid, needId) => {
   // get new unique id for bid
