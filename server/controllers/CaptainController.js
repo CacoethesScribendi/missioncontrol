@@ -33,5 +33,4 @@ const registerNeedTypeForCaptain = async (req, res) => {
   }
 };
 
-
 module.exports = { create, registerNeedTypeForCaptain };

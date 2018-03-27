@@ -9,10 +9,9 @@ const Rx = require('rxjs/Rx');
 const MAX_LOCAL_RADIUS = 10e5;
 
 
-const addNewCaptain = async ({ dav_id, notification_url }) => {
+const addNewCaptain = async ({ dav_id }) => {
   await redis.hmsetAsync(`captains:${dav_id}`,
-    'id', dav_id,
-    'notification_url', notification_url
+    'id', dav_id
   );
 
   return dav_id;
