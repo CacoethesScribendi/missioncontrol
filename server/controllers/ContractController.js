@@ -29,7 +29,6 @@ const sign = async (req, res) => {
 
 const signAndNotifyCaptain = async function ({id, bid_id, dav_id, ttl}) {
   await signContract({bid_id, id, ttl});
-  addNewVehicle(bid_id);
   updateBidStatus(bid_id, 'contractSigned');
   const captain = await getCaptain(dav_id);
   const contract = await getContract(id, bid_id);

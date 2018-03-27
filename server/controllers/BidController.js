@@ -15,7 +15,7 @@ const create = async (req, res) => {
     res.status(422).json(validationErrors);
   } else {
     const bid = await addNewBid(params, needId);
-    await addNewVehicle();
+    await addNewVehicle(bid.id);
     if (bid) {
       res.json(bid);
     } else {
