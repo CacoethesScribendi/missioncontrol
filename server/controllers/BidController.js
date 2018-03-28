@@ -1,4 +1,4 @@
-const { getBidsForNeed, addNewBid, getBid, updateBidStatus, setBidRequester } = require('../store/bids');
+const { getBidsForNeed, addNewBid, getBid, updateBidStatus, setBidRequester, setMissionId } = require('../store/bids');
 const { addBidToCaptain, getBids } = require('../store/captains');
 const { addNewVehicle } = require('../store/vehicles');
 const { hasStore } = require('../lib/environment');
@@ -36,14 +36,15 @@ const chooseBid = async (req, res) => {
     const { requester_id } = req.query;
     const { bidId } = req.params;
     await updateBidStatus(bidId, 'awarded');
+    await setMissionId(bidId);
     await setBidRequester(bidId, requester_id);
     const bid = await getBid(bidId);
     await addBidToCaptain(bid.dav_id, bidId);
-    res.status(200).send();
+    res.status(200).send(bid);
   }
   catch (e) {
-    res.status(500).send();
     console.error(e);
+    res.status(500).send();
   }
 };
 

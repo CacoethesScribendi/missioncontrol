@@ -37,6 +37,10 @@ const updateBidStatus = async (id, status) => {
 
 const setBidVehicle = (id, vehicleId) => redis.hsetAsync(`bids:${id}`, 'vehicle_id', vehicleId);
 const setBidRequester = (id, requesterId) => redis.hsetAsync(`bids:${id}`, 'requester_id', requesterId);
+const setMissionId = async (id) => {
+  const mission_id = await redis.incrAsync('next_mission_id');
+  redis.hsetAsync(`bids:${id}`, 'mission_id', mission_id);
+};
 
 const getBid = async bidId => {
   // Set TTL for bid
@@ -76,6 +80,7 @@ module.exports = {
   updateBidStatus,
   setBidVehicle,
   setBidRequester,
+  setMissionId
 };
 
 const setBidTTL = (bidId, ttl) => redis.expire(`bids:${bidId}`, ttl);

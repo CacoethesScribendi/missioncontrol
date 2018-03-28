@@ -31,14 +31,14 @@ const updateMission = async (id, params) => {
 const createMission = async (bidId) => {
   // get bid details
   const bid = await getBid(bidId);
-  const { vehicle_id, price, time_to_pickup, time_to_dropoff, need_id, requester_id, dav_id } = bid;
+  const { mission_id, vehicle_id, price, time_to_pickup, time_to_dropoff, need_id, requester_id, dav_id } = bid;
 
   // get need details
   const need = await getNeed(need_id);
   const { pickup_latitude, pickup_longitude, dropoff_latitude, dropoff_longitude, pickup_at, cargo_type, weight } = need;
 
   // get new unique id for mission
-  const missionId = await redis.incrAsync('next_mission_id');
+  const missionId = mission_id;
   const started_at = Date.now();
   const status = 'started';
 
