@@ -1,7 +1,7 @@
 const {getBid, updateBidStatus} = require('../store/bids');
 const signConstraints = require('./constraints/contract/sign');
 const {signContract, getContract} = require('../store/contracts');
-const {addNewVehicle} = require('../store/vehicles');
+// const {addNewVehicle} = require('../store/vehicles');
 const {getCaptain} = require('../store/captains');
 const validate = require('../lib/validate');
 const axios = require('axios');
