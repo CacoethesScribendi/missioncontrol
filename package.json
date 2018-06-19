@@ -16,7 +16,9 @@
   "scripts": {
     "start": "node server/start-servers.js",
     "test": "gulp js",
-    "thrift": "thrift -gen js:node -strict -recurse -out ./server/thrift ./resources/idl/CaptainMissionControl.thrift"
+    "thrift": "thrift -gen js:node -strict -recurse -out ./server/thrift ./resources/idl/CaptainMissionControl.thrift",
+    "snyk-protect": "snyk protect",
+    "prepare": "npm run snyk-protect"
   },
   "dependencies": {
     "@turf/turf": "^5.1.6",
@@ -37,7 +39,8 @@
     "truffle-contract": "^3.0.4",
     "truffle-hdwallet-provider": "0.0.3",
     "uuid": "^3.2.1",
-    "web3": "^0.20.6"
+    "web3": "^0.20.6",
+    "snyk": "^1.83.0"
   },
   "devDependencies": {
     "gulp": "^3.9.1",
@@ -45,5 +48,6 @@
     "gulp-nodemon": "^2.2.1",
     "gulp-shell": "^0.6.5",
     "jest-cli": "^22.4.3"
-  }
+  },
+  "snyk": true
 }
